@@ -27,51 +27,44 @@ window.findNRooksSolution = function(n) {
 
 // return the number of nxn chessboards that exist, with n rooks placed such that none of them can attack each other
 window.countNRooksSolutions = function(n) {
-  var perms = [];
-  var matrices = [];
+  var matrix = [];
 
-  var permutate = function() {
-    var choices = [0, 1];
-    var outcomes = [];
-    var thusFar = [];
+  for (var i = 0; i < n; i++) {
+    for (var j = 0; j < n; j++) {
+      matrix.push([i, j]);
+    }
+  }
 
-    var combos = function(roundsToGo) {
-      if (roundsToGo === 0) {
-        outcomes.push(thusFar.slice());
-        return;
-      }
-      for (var i = 0; i < choices.length; i++) {
-        thusFar.push(choices[i]);
-        combos(roundsToGo - 1);
-        thusFar.pop();
+  var answers = [];
+  var inner = function inner(arr, solution) {
+    var holder;
+    var solution = solution || [];
+    parent = parent || null;
+    if (arr.length === 1) {
+      solution.push(arr[0]);
+      answers.push(solution);
+    } else {
+      for (var i = 0; i < Math.sqrt(arr.length); i++) {
+        solution.push(arr[i]);
+        holder = arr.filter(function(el) {
+          if (el[0] === arr[i][0] ||
+              el[1] === arr[i][1]) {
+            return false;
+          }
+          return true;
+        });
+        inner(holder, solution.slice());
+        solution.pop();
       }
     }
-    combos(n*n);
-    return outcomes;
+  }
+  inner(matrix);
+  console.log(answers)
 
-  };
 
-  perms = permutate();
-  perms = perms.filter(function(el) {
-      return el.reduce(function(a, b) {
-        return a + b;
-      }) === n;
-    });
-  perms.forEach(function(el) {
-    var temp = [];
-    while (el.length) {
-      temp.push(el.splice(0, n));
-    }
-    matrices.push(temp);
-  });
+  console.log('Number of solutions for ' + n + ' rooks:', answers.length);
+  return answers.length;
 
-  matrices = matrices.filter(function(matrix) {
-    var board = new Board(matrix);
-    return !board.hasAnyRooksConflicts();
-  });
-
-  console.log('Number of solutions for ' + n + ' rooks:', matrices.length);
-  return matrices.length;
 };
 
 
